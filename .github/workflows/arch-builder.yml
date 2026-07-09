@@ -47,8 +47,6 @@ jobs:
               makepkg -s --noconfirm
             "
           '
-          "
-
       - name: Upload Compiled Package
         uses: actions/upload-artifact@v4
         with:
