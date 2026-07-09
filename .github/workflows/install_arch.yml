@@ -17,6 +17,7 @@ jobs:
         run: |
           apt -y update && apt -y upgrade
           apt install -y podman
+
        #  apt install -y podman docker-compose
 
           tee -a "/etc/containers/registries.conf.d/10-unqualified-search-registries.conf" <<EOF
