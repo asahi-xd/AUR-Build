@@ -30,15 +30,15 @@ jobs:
           docker run --rm -e TARGET_PKG="$TARGET_PKG" -v ${{ github.workspace }}:/workspace archlinux:base /bin/bash -c '
             # Update system and install base development tools
             pacman -Syu --noconfirm base-devel git sudo
-
+            
             # Create a generic builder user
             useradd -m builder
             echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
             chmod -R a+rw /workspace
             
             # Switch to the non-root user context
-            # Use -E with sudo to pass the TARGET_PKG environment variable down to the builder user
-            sudo -u builder -E bash -c "
+            # Use --preserve-env to keep only TARGET_PKG, and force HOME to the builder directory
+            sudo --preserve-env=TARGET_PKG -u builder HOME=/home/builder bash -c "
               cd /workspace
               git clone https://aur.archlinux.org/${TARGET_PKG}.git
               cd ${TARGET_PKG}
