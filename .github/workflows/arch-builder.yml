@@ -1,17 +1,11 @@
-name: AUR Package Compiler
+name: AUR Package Builder
 
 on:
-#  schedule:
-    # Runs every day at midnight to check for updates
- #   - cron: '0 0 * * *'
   workflow_dispatch:
-    # Allows on-demand terminal execution via 'gh workflow run'
     inputs:
       package_name:
-        description: 'Specific AUR package to build on-demand'
-        required: false
-        default: 'gtk2'
-
+        description: 'AUR package to build'
+        required: true
 jobs:
   build-aur:
     runs-on: ubuntu-latest
@@ -19,10 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile Package inside Arch Linux Container
+      - name: Build Package inside Arch Linux Container
         run: |
           # Define the target package
-          export TARGET_PKG="${{ github.event.inputs.package_name || 'gtk2' }}"
+          export TARGET_PKG="${{ github.event.inputs.package_name }}"
           echo "Target package set to: $TARGET_PKG"
           
           # 1. Use -e TARGET_PKG="$TARGET_PKG" to pass the variable into Docker
@@ -30,6 +24,7 @@ jobs:
           docker run --rm -e TARGET_PKG="$TARGET_PKG" -v ${{ github.workspace }}:/workspace archlinux:base /bin/bash -c '
             # Update system and install base development tools
             pacman -Syu --noconfirm base-devel git sudo
+            pacman-key --init
             
             # Create a generic builder user
             useradd -m builder
