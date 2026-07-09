@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       packages:
-        description: 'List of packages to build, separated by space.'
+        description: 'List of AUR packages to build, separated by space.'
         required: true
         type: string
 jobs:
@@ -13,20 +13,28 @@ jobs:
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v6
+
       - name: 'Build packages inside Arch Linux Container'
         run: |
-          # sudo apt -y update && sudo apt -y upgrade
-          # sudo apt install -y podman docker-compose
+          echo "Building: ${{ inputs.packages }}"
           
           sudo tee -a "/etc/containers/registries.conf.d/10-unqualified-search-registries.conf" <<EOF
           unqualified-search-registries = ["docker.io"]
           EOF
           
-          # export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-          # systemctl enable --now --user podman.socket
-          
-          #  podman run --rm -e 
-          podman run --rm -e TARGET_PKG="${{ inputs.packages }}" -v ${{ github.workspace }}:/workspace archlinux:base /bin/bash -c whoami
+          podman run --rm -e INPUT_PKGS="${{ inputs.packages }}" -v ${{ github.workspace }}:/workspace archlinux:latest /bin/bash -c '
+            
+            pacman-key --init
+
+            pacman -Syu --needed --noconfirm base base-devel git
+
+            useradd -mG wheel builder
+            echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+            chmod -R a+rw /workspace
+
+            
+            
 
 
 
