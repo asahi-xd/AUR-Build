@@ -23,8 +23,9 @@ jobs:
           # 2. Swap to single quotes for the outer docker bash command to avoid premature expansion
           docker run --rm -e TARGET_PKG="$TARGET_PKG" -v ${{ github.workspace }}:/workspace archlinux:base /bin/bash -c '
             # Update system and install base development tools
-            pacman -Syu --noconfirm base-devel git sudo
             pacman-key --init
+
+            pacman -Syu --noconfirm base-devel git sudo
             
             # Create a generic builder user
             useradd -m builder
