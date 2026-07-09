@@ -51,7 +51,7 @@ jobs:
           find . -type f -name "*:*.pkg.tar.zst" | while read -r file; do
             new_file="${file//:/-}"
             echo "Renaming $file to $new_file"
-            mv "$file" "$new_file"
+            sudo mv "$file" "$new_file"
           done
 
       - name: 'Figure out the current date and time for artifact name.'
