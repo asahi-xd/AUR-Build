@@ -8,7 +8,7 @@ on:
         required: true
         type: string
 jobs:
-  setup_arch:
+  build_packages:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository."
