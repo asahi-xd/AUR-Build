@@ -1,7 +1,7 @@
 name: AUR Package Compiler
 
 on:
-  schedule:
+#  schedule:
     # Runs every day at midnight to check for updates
  #   - cron: '0 0 * * *'
   workflow_dispatch:
