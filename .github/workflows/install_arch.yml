@@ -38,7 +38,9 @@ jobs:
               sudo sed -i -E '/^OPTIONS=\(/ s/([[:space:]]|\()debug([[:space:]]|\))/\1!debug\2/g' /etc/makepkg.conf
               git clone https://aur.archlinux.org/yay-bin.git
               cd yay-bin
-              makepkg -s --noconfirm"
+              makepkg -si --noconfirm
+              yay --version
+              "
               '
             
             
