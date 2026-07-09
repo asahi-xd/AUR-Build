@@ -31,7 +31,7 @@ jobs:
             useradd -mG wheel builder
             echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-            chmod -R a+rw /workspace
+            chmod -R a+rw /workspace'
 
             
             
