@@ -13,7 +13,6 @@ jobs:
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v6
-
       - name: 'Build packages inside Arch Linux Container'
         run: |
           apt -y update && apt -y upgrade
