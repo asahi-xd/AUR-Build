@@ -16,12 +16,16 @@ LOCAL_REPO_NAME="gh-aur-builds"
 LOCAL_REPO_DIR="/mnt/Data_Drive/.local/pacman/repo"
 DOWNLOAD_TMP_DIR="/mnt/Data_Drive/.local/pacman/tmp"
 
-echo "Verifying that the package names provided are valid...\n"
+# Ensure directories exist
+mkdir -p "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"
+
+
+printf "Verifying that the package names provided are valid...\n\n"
 
 packages=("$@")
 
-for i in ${packages[@]}: do
-    if ! $( yay -Si $i ); then
+for i in "${packages[@]}"; do
+    if ! yay -Si "$i" > /dev/null 2>&1 ; then
         invalid_pkgs+=($i)
     fi
 done
@@ -54,8 +58,10 @@ case "$choice" in
 esac
 
 
-echo "Running the workflow...\n"
-echo "Building package(s): $@"
+printf "\nRunning the workflow...\n\n"
+printf "Building package(s): '$@'\n"
+
+shopt -s globstar
 
 gh workflow run \
     "$WORKFLOW" -R "$REPO" \
@@ -65,14 +71,11 @@ gh workflow run \
     && gh run -R "$REPO" watch $RUN_ID \
     && gh run -R "$REPO" download $RUN_ID --dir "$DOWNLOAD_TMP_DIR" \
     && ARTIFACT_NAME=$(gh api repos/$REPO/actions/runs/$RUN_ID/artifacts --jq '.artifacts[0].name') \
-    && echo $ARTIFACT_NAME
-    # This should then move the package files to the local repo directory,
-    # and return some kind of confirmation that its done
-    # ... WIP
+    && echo $ARTIFACT_NAME \
+    && cp -r "$DOWNLOAD_TMP_DIR"/"$ARTIFACT_NAME"/**/*.pkg.tar.zst "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME" \
+    && echo "Adding package(s) to local repository..." \
+    && repo-add "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"/"$LOCAL_REPO_NAME".db.tar.zst "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"/*.pkg.tar.zst \
+    && printf "\nSuccessfully built and added packages to local repo!\n"
 
-echo "Adding package(s) to local repository..."
-
-# Add a logic block to have the below part execute iff the workflow ran properly without errors.
-repo-add "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"/"$LOCAL_REPO_NAME".db.tar.zst ./*.pkg.tar.zst
 
 
