@@ -24,14 +24,20 @@ if [ ! -d "$LOCAL_REPO_DIR" ]; then
     exit 1
 fi
 
-#mkdir -p "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"
-
 # Ensure local repo was added to /etc/pacman.conf
 if pacman-conf --repo-list | grep -q "^${LOCAL_REPO_NAME}$"; then
     echo "Local repository found. Continuing..."
 else
     echo "Local repository does not exist in your /etc/pacman.conf file."
-    echo "Please add it manually before running the script."
+    printf "Please add it manually before running the script.\n"
+
+cat <<EOF
+
+[$LOCAL_REPO_NAME]
+SigLevel = Optional
+Server = file://$LOCAL_REPO_DIR/$LOCAL_REPO_NAME
+
+EOF
     exit 1
 fi
 
@@ -57,17 +63,14 @@ echo "Press ENTER for the default choice [yes]. Or Press Ctrl+C to cancel the sc
 read choice
 
 case "$choice" in
-    "yes" )
+    "yes" | "" )
         for i in "${packages[@]}"; do
             curl "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$i" | less
         done
-        exit 0 # for testing
     ;;
     "no" )
-        echo "Do something else"
-    ;;
-    "" )
-        echo "No choice made, defaulting to [yes]."
+        echo "PKGBUILD(s) will not be shown."
+        echo "Continuing with the script..."
     ;;
     * )
         echo "Invalid choice. Exiting script..."
@@ -82,7 +85,7 @@ echo "$@"
 echo ""
 
 shopt -s globstar
-trap 'printf "\nNot allowed to SIGINT while workflow is running..."' INT
+trap '' INT
 
 gh workflow run \
     "$WORKFLOW" -R "$REPO" \
