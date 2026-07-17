@@ -53,8 +53,13 @@ done
 
 if [ ${#invalid_pkgs[@]} -ne 0 ]; then
     echo "Invalid package name(s) provided:"
-    echo ${invalid_pkgs[@]}
+    echo "${invalid_pkgs[@]}"
     exit 1
+fi
+
+# check for pager
+if [ -z $PAGER ]; then
+    PAGER="command less -R"
 fi
 
 echo "Do you want to read the PKGBUILDs for the provided package(s)? [yes/no]"
@@ -65,7 +70,7 @@ read choice
 case "$choice" in
     "yes" | "" )
         for i in "${packages[@]}"; do
-            curl "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$i" | less
+            curl "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$i" | $PAGER
         done
     ;;
     "no" )
@@ -78,11 +83,28 @@ case "$choice" in
     ;;
 esac
 
+printf "\nDo you want to continue building the package(s)? [yes/no]"
+printf "Press ENTER for the default choice [yes]. Or Press Ctrl+C to cancel the script and exit.\n"
 
-printf "\nRunning the workflow...\n\n"
-printf "Building package(s):\n"
-echo "$@"
-echo ""
+read choice
+
+case "$choice" in
+    "yes" | "" )
+        printf "\nRunning the workflow...\n\n"
+        printf "Building package(s):\n"
+        echo "$@"
+        echo ""
+    ;;
+    "no" )
+        echo "[no] chosen. Exiting script..."
+        exit 1
+    ;;
+    * )
+        echo "Invalid choice. Exiting script..."
+        exit 1
+    ;;
+esac
+
 
 shopt -s globstar
 trap '' INT
