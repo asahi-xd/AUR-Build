@@ -19,7 +19,12 @@ if [ $# -eq 0 ]; then
 fi
 
 # Ensure directories exist
-mkdir -p "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"
+if [ ! -d "$LOCAL_REPO_DIR" ]; then
+    echo "Directory '$LOCAL_REPO_DIR' does not exist."
+    exit 1
+fi
+
+#mkdir -p "$LOCAL_REPO_DIR"/"$LOCAL_REPO_NAME"
 
 # Ensure local repo was added to /etc/pacman.conf
 if pacman-conf --repo-list | grep -q "^${LOCAL_REPO_NAME}$"; then
@@ -53,7 +58,10 @@ read choice
 
 case "$choice" in
     "yes" )
-        echo "Do something"
+        for i in "${packages[@]}"; do
+            curl "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$i" | less
+        done
+        exit 0 # for testing
     ;;
     "no" )
         echo "Do something else"
